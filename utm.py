@@ -5,8 +5,11 @@ separator = '1'
 delta_separator = '11'
 input_separator = '111'
 TAPE_LEFT_RIGHT_SPACE = 15
+PRINT_LEFT_RIGHT_SPACE = 62
 calculations_counter = 0
 delta_dictionaries = []
+tape_border_up = ""
+tape_border_down = ""
 tape = []
 head = 0
 print_head = 0
@@ -14,14 +17,14 @@ current_state = "q1"
 calculation_finished = False
 
 
-def generate_and_print_tape_border(temp_tape, head_char):
+def generate_tape_border(temp_tape, head_char):
     tape_border = ""
     i = 0
     while i < len(temp_tape):
         tape_border = tape_border + "─"
         i += 1
     tape_border = tape_border[:print_head] + head_char + tape_border[print_head:]
-    print(tape_border)
+    return tape_border
 
 
 def find_and_remove_code():
@@ -46,7 +49,7 @@ def initialize_tape():
         tape.append(element)
     add_blanks()
     head = TAPE_LEFT_RIGHT_SPACE
-    print_head = head + 3 * TAPE_LEFT_RIGHT_SPACE + 2
+    print_head = 4 * TAPE_LEFT_RIGHT_SPACE + 2
 
 
 def initialize_delta_tuples():
@@ -92,13 +95,19 @@ def convert_delta_tuples_to_dictionaries():
 
 
 def print_tape():
+    global tape_border_up
+    global tape_border_down
     print("Tape:")
     temp_tape = "│ "
     for tape_element in tape:
         temp_tape = temp_tape + tape_element + " │ "
-    generate_and_print_tape_border(temp_tape, "┬")
+    temp_tape = temp_tape[print_head - PRINT_LEFT_RIGHT_SPACE:print_head + PRINT_LEFT_RIGHT_SPACE]
+    if tape_border_up == "" and tape_border_down == "":
+        tape_border_up = generate_tape_border(temp_tape, "┬")
+        tape_border_down = generate_tape_border(temp_tape, "┴")
+    print(tape_border_up)
     print(temp_tape)
-    generate_and_print_tape_border(temp_tape, "┴")
+    print(tape_border_down)
     print("\n")
 
 
@@ -133,6 +142,8 @@ def execute_transition():
         if transition.get('direction') == 'R':
             head = head + 1
             print_head = print_head + 4
+            if head + TAPE_LEFT_RIGHT_SPACE >= len(tape):
+                add_blanks()
         elif transition.get('direction') == 'L':
             head = head - 1
             print_head = print_head - 4
@@ -150,6 +161,7 @@ def main():
     initialize_tape()
     convert_delta_tuples_to_dictionaries()
     print_tape()
+
     while calculation_finished is False:
         execute_transition()
     calculate_result()
